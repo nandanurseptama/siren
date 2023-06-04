@@ -53,4 +53,5 @@ class PostsCubit extends Cubit<PaginationState<PostEntity>> {
       );
     });
   }
+
 }

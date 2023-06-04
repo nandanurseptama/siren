@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_cast
+
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -9,8 +11,10 @@ import 'package:siren/cores/interfaces/states/pagination_state.dart';
 import 'package:siren/cores/theme.dart';
 import 'package:siren/cores/widgets/not_found_screen.dart';
 import 'package:siren/dependency.dart';
+import 'package:siren/features/post/presentation/presenters/comments_presenter.dart';
 import 'package:siren/features/post/presentation/presenters/liked_post_presenter.dart';
 import 'package:siren/features/post/presentation/presenters/posts_presenter.dart';
+import 'package:siren/features/post/presentation/state_manager/comments_cubit.dart';
 import 'package:siren/features/post/presentation/state_manager/posts_cubit.dart';
 import 'package:siren/features/user/domain/entity/user_entity.dart';
 import 'package:siren/features/user/presentation/friend_cubit.dart';
@@ -19,6 +23,7 @@ import 'package:siren/features/user/presentation/friends_cubit.dart';
 import 'package:siren/features/user/presentation/friends_presenter.dart';
 import 'package:siren/features/user/presentation/profile_cubit.dart';
 import 'package:siren/features/user/presentation/users_presenter.dart';
+import 'package:siren/ui/screens/comments_screen.dart';
 import 'package:siren/ui/screens/home_screen.dart';
 import 'package:siren/ui/screens/liked_post_screen.dart';
 import 'package:siren/ui/screens/navigation_screen.dart';
@@ -71,6 +76,9 @@ class MyApp extends StatelessWidget {
         }
         if (path.startsWith(UserListScreen.friendsRouteName)) {
           return getRoute(friendsScreen);
+        }
+        if (path == (CommentsScreen.routeName)) {
+          return getRoute(commentsPresenter(settings.arguments));
         }
         if (settings.name == NavigationScreen.routeName) {
           return getRoute(_navigationScreenBuilder());
@@ -372,6 +380,24 @@ class MyApp extends StatelessWidget {
             }),
           ),
         );
+      },
+    );
+  }
+
+  Widget commentsPresenter(Object? arguments) {
+    if (arguments == null) {
+      return const NotFoundScreen();
+    }
+    if (arguments is! PostEntity) {
+      return const NotFoundScreen();
+    }
+    return CommentsPresenter(
+      commentsCubit: CommentsCubit(
+          createCommentUsecase: dependency.get(),
+          getPostCommentsUsecase: dependency.get(),
+          userId: profileMeCubit.userId),
+      builder: (context, commentsPresenterState, commentsState) {
+        return CommentsScreen(commentsState: commentsState, post: arguments);
       },
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:siren/cores/utils/utils.dart';
 import 'package:siren/features/post/domain/entity/post_entity.dart';
 import 'package:siren/features/post/presentation/presenters/liked_post_presenter.dart';
+import 'package:siren/ui/screens/comments_screen.dart';
 import 'package:siren/ui/widgets/image_widget.dart';
 import 'package:siren/ui/widgets/profile_picture_widget.dart';
 
@@ -102,13 +103,20 @@ class _UserPostWidgetState extends State<UserPostWidget> {
               isLiked ? Icons.favorite : Icons.favorite_outline,
               color: isLiked ? Colors.pink : null,
             )),
-        IconButton(onPressed: () {}, icon: Icon(Icons.chat_bubble_outline))
+        IconButton(onPressed: navigateToCommentScreen, icon: Icon(Icons.chat_bubble_outline))
       ],
     );
   }
 
+  void navigateToCommentScreen() {
+    Navigator.pushNamed(context, CommentsScreen.routeName,
+        arguments: widget.post);
+    return;
+  }
+
   bool get isLiked {
-    var ancestorState = context.findAncestorStateOfType<LikedPostPresenterState>();
+    var ancestorState =
+        context.findAncestorStateOfType<LikedPostPresenterState>();
     return ancestorState?.isLiked(widget.post.id) == true;
   }
 
@@ -188,7 +196,7 @@ class _UserPostWidgetState extends State<UserPostWidget> {
 
   Widget _tagItem({required String tag, required BuildContext context}) {
     return OutlinedButton(
-        onPressed: (){
+        onPressed: () {
           return widget.onTapTag?.call(tag);
         },
         style: const ButtonStyle(

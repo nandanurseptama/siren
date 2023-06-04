@@ -7,6 +7,7 @@ abstract class Env {
   String get apiKey => "647adddd347adb508046eb37";
   String get postUrl => "$baseUrl/post";
   String get userUrl => "$baseUrl/user";
+  String get commentUrl => "$baseUrl/comment";
 
   String get meId => "60d0fe4f5311236168a109f4";
 }

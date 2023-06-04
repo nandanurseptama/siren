@@ -7,6 +7,7 @@ extension DateTimeExtension on DateTime {
     }
     return day.toString();
   }
+
   String get MMyyyy {
     return "$MM $year";
   }
@@ -76,5 +77,24 @@ extension DateTimeExtension on DateTime {
       default:
         return "Dec";
     }
+  }
+
+  String get commentTime {
+    var now = DateTime.now().toUtc();
+
+    var diff = now.difference(this);
+    if (diff.inHours.abs() >= 24) {
+      var d = (diff.inHours.abs() / 24).floor();
+      return "$d d";
+    }
+    if (diff.inMinutes.abs() >= 60) {
+      var d = (diff.inMinutes.abs() / 60).floor();
+      return "$d h";
+    }
+    if (diff.inSeconds.abs() >= 60) {
+      var d = (diff.inSeconds.abs() / 60).floor();
+      return "$d m";
+    }
+    return "${diff.inSeconds.abs()} s";
   }
 }

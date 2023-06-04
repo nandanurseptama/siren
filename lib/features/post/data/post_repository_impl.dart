@@ -7,6 +7,7 @@ import 'package:siren/cores/failures/network_failure/invalid_response_type_failu
 import 'package:siren/cores/failures/network_failure/response_null_failure.dart';
 import 'package:siren/cores/interfaces/paginate_data.dart';
 import 'package:siren/cores/usecase/repository_error_handler.dart';
+import 'package:siren/features/post/data/models/comment_model.dart';
 import 'package:siren/features/post/data/models/post_model.dart';
 import 'package:siren/features/post/domain/post_repository.dart';
 
@@ -110,6 +111,59 @@ class PostRepositoryImpl implements PostRepository {
           json: response.data,
           builder: (p0) {
             return PostModel.fromJson(p0);
+          });
+      debugPrint("pagination $pagination");
+      return pagination;
+    } catch (err, trace) {
+      var f =
+          repositoryErrorHandler(err: err, processId: processId, trace: trace);
+      throw f;
+    }
+  }
+
+  @override
+  Future<CommentModel> addComments(
+      {required String processId, required CommentModel comment}) async {
+    try {
+      var response = await _httpClient.post(
+        "${_env.commentUrl}/create",
+        data: comment.createComment(),
+      );
+      if (response.data == null) {
+        throw ResponseNullFailure();
+      }
+      if (response.data is! Map<String, dynamic>) {
+        throw InvalidResponseTypeFailure();
+      }
+      return CommentModel.fromJson(response.data);
+    } catch (err, trace) {
+      var f =
+          repositoryErrorHandler(err: err, processId: processId, trace: trace);
+      throw f;
+    }
+  }
+
+  @override
+  Future<PaginateData<CommentModel>> getComments(
+      {required String processId,
+      required String postId,
+      int page = 0,
+      int limit = 20}) async {
+    try {
+      var response = await _httpClient.get(
+        "${_env.postUrl}/$postId/comment",
+        queryParameters: {"page": page, "limit": limit},
+      );
+      if (response.data == null) {
+        throw ResponseNullFailure();
+      }
+      if (response.data is! Map<String, dynamic>) {
+        throw InvalidResponseTypeFailure();
+      }
+      var pagination = PaginateData.fromJson(
+          json: response.data,
+          builder: (p0) {
+            return CommentModel.fromJson(p0);
           });
       debugPrint("pagination $pagination");
       return pagination;

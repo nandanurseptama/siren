@@ -1,4 +1,5 @@
 import 'package:siren/cores/interfaces/paginate_data.dart';
+import 'package:siren/features/post/data/models/comment_model.dart';
 import 'package:siren/features/post/data/models/post_model.dart';
 
 abstract class PostRepository {
@@ -23,5 +24,16 @@ abstract class PostRepository {
 
   Future<void> deleteLikedPost(
       {required String processId, required String postId});
-  
+
+  Future<PaginateData<CommentModel>> getComments({
+    required String processId,
+    required String postId,
+    int page = 0,
+    int limit = 20,
+  });
+
+  Future<CommentModel> addComments({
+    required String processId,
+    required CommentModel comment,
+  });
 }
