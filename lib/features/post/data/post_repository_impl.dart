@@ -14,11 +14,11 @@ import 'package:siren/features/post/domain/post_repository.dart';
 class PostRepositoryImpl implements PostRepository {
   final Env _env;
   final Dio _httpClient;
-  final Box<String> _likedPostDb;
+  final Box<PostModel> _likedPostDb;
 
   PostRepositoryImpl({
     required Env env,
-    @Named("likedPostDatabase") required Box<String> likedPostDb,
+    @Named("likedPostDatabase") required Box<PostModel> likedPostDb,
     required Dio httpClient,
   })  : _env = env,
         _likedPostDb = likedPostDb,
@@ -52,7 +52,7 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
-  List<String> getLikedPosts({required String processId}) {
+  List<PostModel> getLikedPosts({required String processId}) {
     try {
       var result = _likedPostDb.values.map((e) => e).toList();
       return result;
@@ -65,9 +65,9 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   Future<void> addLikedPost(
-      {required String processId, required String postId}) async {
+      {required String processId, required PostModel post}) async {
     try {
-      await _likedPostDb.put(postId, postId);
+      await _likedPostDb.put(post.id, post);
       return;
     } catch (err, trace) {
       var f =

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:siren/cores/interfaces/states/pagination_state.dart';
 import 'package:siren/cores/widgets/shimmer_container.dart';
 import 'package:siren/features/user/domain/entity/user_entity.dart';
+import 'package:siren/ui/screens/users_list_screen.dart';
 
 class NumFriendsText extends StatelessWidget {
   final PaginationState<UserEntity> friendsState;
@@ -40,6 +41,10 @@ class NumFriendsText extends StatelessWidget {
       );
     }
     return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, UserListScreen.friendsRouteName);
+        return;
+      },
       child: SizedBox(
         height: 20,
         child: Text(

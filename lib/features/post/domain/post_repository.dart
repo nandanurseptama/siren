@@ -14,12 +14,12 @@ abstract class PostRepository {
     required String userId,
   });
 
-  List<String> getLikedPosts({
+  List<PostModel> getLikedPosts({
     required String processId,
   });
 
   Future<void> addLikedPost(
-      {required String processId, required String postId});
+      {required String processId, required PostModel post});
 
   Future<void> deleteLikedPost(
       {required String processId, required String postId});

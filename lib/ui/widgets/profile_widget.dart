@@ -44,6 +44,9 @@ class _ProfileWidgetState extends State<ProfileWidget> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              const SizedBox(
+                height: 16,
+              ),
               headerShimmer(),
               _userPostsBuilder(),
             ],

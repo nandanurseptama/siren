@@ -65,7 +65,7 @@ abstract class CommonModule {
 
   @Named("likedPostDatabase")
   @preResolve
-  Future<Box<String>> get likedPostDatabase => Hive.openBox("likedPosts");
+  Future<Box<PostModel>> get likedPostDatabase => Hive.openBox("likedPosts");
 
   @Named("profileMeCubit")
   ProfileCubit meStateManager({

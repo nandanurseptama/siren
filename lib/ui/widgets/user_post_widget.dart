@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:siren/cores/utils/utils.dart';
 import 'package:siren/features/post/domain/entity/post_entity.dart';
 import 'package:siren/features/post/presentation/presenters/liked_post_presenter.dart';
-import 'package:siren/features/post/presentation/presenters/posts_presenter.dart';
 import 'package:siren/ui/widgets/image_widget.dart';
 import 'package:siren/ui/widgets/profile_picture_widget.dart';
 
@@ -109,7 +108,7 @@ class _UserPostWidgetState extends State<UserPostWidget> {
   }
 
   bool get isLiked {
-    var ancestorState = context.findAncestorStateOfType<PostsPresenterState>();
+    var ancestorState = context.findAncestorStateOfType<LikedPostPresenterState>();
     return ancestorState?.isLiked(widget.post.id) == true;
   }
 
@@ -123,7 +122,7 @@ class _UserPostWidgetState extends State<UserPostWidget> {
       if (isLiked) {
         return ancestorState.dislikePost(widget.post.id);
       }
-      return ancestorState.likePost(widget.post.id);
+      return ancestorState.likePost(widget.post);
     };
   }
 

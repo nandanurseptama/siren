@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:siren/cores/assets.dart';
-import 'package:siren/cores/interfaces/states/pagination_state.dart';
+import 'package:siren/cores/interfaces/states/base_state.dart';
 import 'package:siren/cores/utils/extensions/string_extensions.dart';
 import 'package:siren/cores/widgets/error_container_widget.dart';
 import 'package:siren/features/post/domain/entity/post_entity.dart';
@@ -8,21 +8,20 @@ import 'package:siren/ui/widgets/search_field_widget.dart';
 import 'package:siren/ui/widgets/user_post_widget.dart';
 import 'package:siren/ui/widgets/user_post_widget_shimmer.dart';
 
-class PostListWidget extends StatefulWidget {
-  final PaginationState<PostEntity> postsState;
+class LikedPostListWidget extends StatefulWidget {
+  final BaseState<List<PostEntity>> postsState;
   final ValueChanged<String>? navigateToProfileScreen;
-  final VoidCallback onLoad;
-  const PostListWidget(
+  const LikedPostListWidget(
       {super.key,
       required this.postsState,
-      this.navigateToProfileScreen,
-      required this.onLoad});
+      this.navigateToProfileScreen
+    });
 
   @override
-  State<PostListWidget> createState() => _PostListWidgetState();
+  State<LikedPostListWidget> createState() => _LikedPostListWidgetState();
 }
 
-class _PostListWidgetState extends State<PostListWidget> {
+class _LikedPostListWidgetState extends State<LikedPostListWidget> {
   final FocusNode _searchFieldFocusNode = FocusNode();
   final ValueNotifier<String> _filterTextController = ValueNotifier("");
   final ValueNotifier<List<String>> _selectedTagsController =
@@ -30,9 +29,6 @@ class _PostListWidgetState extends State<PostListWidget> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      widget.onLoad();
-    });
   }
 
   void onTypingSearchField(String value) {
@@ -83,10 +79,10 @@ class _PostListWidgetState extends State<PostListWidget> {
           valueListenable: _selectedTagsController,
           builder: (context, tags, child) {
             return widget.postsState.maybeMap<Widget>(
-              loaded: (value) {
+              success: (value) {
                 return loaded(
-                    totalData: value.total,
-                    posts: value.results,
+                    totalData: value.data.length,
+                    posts: value.data,
                     tags: tags,
                     textFilter: textFilter);
               },
@@ -94,10 +90,10 @@ class _PostListWidgetState extends State<PostListWidget> {
                 return const ErrorContainerWidget();
               },
               loading: (value) {
-                if (value.results?.isNotEmpty == true) {
+                if (value.data?.isNotEmpty == true) {
                   return loaded(
-                      totalData: value.total,
-                      posts: value.results!,
+                      totalData: value.data?.length ?? 0,
+                      posts: value.data!,
                       tags: tags,
                       textFilter: textFilter);
                 }
@@ -140,43 +136,20 @@ class _PostListWidgetState extends State<PostListWidget> {
     required List<String> tags,
     required String textFilter,
   }) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (isFilterActive) {
-          return false;
-        }
-        if (totalData < 1) {
-          return false;
-        }
-        if (posts.isEmpty) {
-          return false;
-        }
-        var maxScrollExtent = notification.metrics.maxScrollExtent;
-        var diff = (totalData - posts.length);
-        var postsLength = posts.length + (diff > 5 ? 5 : diff);
-        var eachPostLength = maxScrollExtent / postsLength;
-        var scrollPixels = notification.metrics.pixels;
-        if (scrollPixels >= eachPostLength * posts.length) {
-          widget.onLoad();
-          return true;
-        }
-        return true;
-      },
-      child: Builder(builder: (context) {
-        var postWidges = _postsItems(
-            posts: posts, tags: tags, textFilter: textFilter, total: totalData);
-        return SingleChildScrollView(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                searchFieldWidget,
-                if (postWidges.isEmpty) searchError(),
-                if (postWidges.isNotEmpty) ...postWidges
-              ]),
-        );
-      }),
-    );
+    return Builder(builder: (context) {
+      var postWidges = _postsItems(
+          posts: posts, tags: tags, textFilter: textFilter, total: totalData);
+      return SingleChildScrollView(
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              searchFieldWidget,
+              if (postWidges.isEmpty) searchError(),
+              if (postWidges.isNotEmpty) ...postWidges
+            ]),
+      );
+    });
   }
 
   List<Widget> _postsItems(

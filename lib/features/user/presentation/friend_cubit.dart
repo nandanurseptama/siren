@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:siren/cores/enums/crud_enum.dart';
 import 'package:siren/cores/interfaces/states/base_state.dart';
 import 'package:siren/features/user/domain/entity/profile_entity.dart';
@@ -9,7 +8,6 @@ import 'package:siren/features/user/presentation/friends_cubit.dart';
 
 typedef FriendState = BaseState<({CrudEnum event, bool isFriend})>;
 
-@lazySingleton
 class FriendCubit extends Cubit<FriendState> {
   final AddFriendUsecase _addFriendUsecase;
   final IsFriendUsecase _isFriendUsecase;
@@ -64,7 +62,7 @@ class FriendCubit extends Cubit<FriendState> {
         ok: (value) {
           emit(const BaseState.success(
               data: (event: CrudEnum.update, isFriend: true)));
-          _friendsCubit.call();
+          _friendsCubit.callFromStart();
           return;
         },
         orElse: () {

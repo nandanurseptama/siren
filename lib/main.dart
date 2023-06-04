@@ -18,9 +18,12 @@ import 'package:siren/features/user/presentation/friend_presenter.dart';
 import 'package:siren/features/user/presentation/friends_cubit.dart';
 import 'package:siren/features/user/presentation/friends_presenter.dart';
 import 'package:siren/features/user/presentation/profile_cubit.dart';
+import 'package:siren/features/user/presentation/users_presenter.dart';
 import 'package:siren/ui/screens/home_screen.dart';
+import 'package:siren/ui/screens/liked_post_screen.dart';
 import 'package:siren/ui/screens/navigation_screen.dart';
 import 'package:siren/ui/screens/profile_screen.dart';
+import 'package:siren/ui/screens/users_list_screen.dart';
 
 import 'cores/enums/crud_enum.dart';
 import 'cores/interfaces/states/base_state.dart';
@@ -37,14 +40,20 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  static int PROFILE_INDEX = 3;
   final GetIt dependency;
   late final PostsCubit postsCubit;
   late final ProfileCubit profileMeCubit;
   late final FriendsCubit friendsCubit;
+  late final FriendCubit friendCubit;
   MyApp({super.key, required this.dependency}) {
     postsCubit = dependency.get();
     profileMeCubit = dependency.get(instanceName: "profileMeCubit");
     friendsCubit = dependency.get();
+    friendCubit = FriendCubit(
+        isFriendUsecase: dependency.get(),
+        addFriendUsecase: dependency.get(),
+        friendsCubit: friendsCubit);
   }
   @override
   Widget build(BuildContext context) {
@@ -60,6 +69,9 @@ class MyApp extends StatelessWidget {
         if (path.startsWith("/profile")) {
           return getRoute(otherProfileScreen(path));
         }
+        if (path.startsWith(UserListScreen.friendsRouteName)) {
+          return getRoute(friendsScreen);
+        }
         if (settings.name == NavigationScreen.routeName) {
           return getRoute(_navigationScreenBuilder());
         }
@@ -73,10 +85,14 @@ class MyApp extends StatelessWidget {
     return NavigationScreen(
       items: const [
         (icon: Icons.home, label: "Home"),
+        (icon: Icons.favorite, label: "Liked"),
+        (icon: Icons.people, label: "Users"),
         (icon: Icons.person, label: "Profile"),
       ],
       builders: [
         homeScreenBuilder,
+        likedPostScreenBuilder,
+        usersScreen,
         profileScreenBuilder,
       ],
     );
@@ -96,7 +112,7 @@ class MyApp extends StatelessWidget {
                 postsState: postsState,
                 navigateToProfileScreen: (value) {
                   if (value == profileMeCubit.userId) {
-                    return onNavigate(1);
+                    return onNavigate(PROFILE_INDEX);
                   }
                   Navigator.pushNamed(context, "/profile?id=$value");
                   return;
@@ -127,7 +143,6 @@ class MyApp extends StatelessWidget {
                     registerProfileStateListener:
                         profilePresenterState.setListener,
                     onLoadUserPost: () {
-                      print("loadmePost");
                       return postsPresenterState.loadPosts(
                           userId: profileMeCubit.userId);
                     },
@@ -143,6 +158,24 @@ class MyApp extends StatelessWidget {
                   );
                 },
               );
+            },
+          );
+        },
+      );
+    };
+  }
+
+  NavigationMenuBuilder get likedPostScreenBuilder {
+    return (context, selectedMenuIndex, onNavigate) {
+      return _likedPostPresenter(
+        builder: (context, likedPostsPresenterState, likedPostsState) {
+          return LikedPostScreen(
+            postsState: likedPostsState,
+            navigateToProfileScreen: (value) {
+              if (value == profileMeCubit.userId) {
+                return onNavigate(PROFILE_INDEX);
+              }
+              Navigator.pushNamed(context, "/profile?id=$value");
             },
           );
         },
@@ -170,7 +203,7 @@ class MyApp extends StatelessWidget {
       BuildContext context,
       PostsPresenterState postsPresenterState,
       PaginationState<PostEntity> postsState,
-      BaseState<List<String>> likedPostsState,
+      BaseState<List<PostEntity>> likedPostsState,
     ) builder,
     required PostsCubit postsCubit,
   }) {
@@ -224,7 +257,7 @@ class MyApp extends StatelessWidget {
   }) {
     return FriendPresenter(
       userId: userId,
-      friendCubit: dependency.get(),
+      friendCubit: friendCubit,
       builder: builder,
     );
   }
@@ -252,6 +285,10 @@ class MyApp extends StatelessWidget {
                 userId: userId,
                 builder: (context, friendPresenterState, friendState) {
                   return Scaffold(
+                    appBar: AppBar(
+                      title: const Text("Profile"),
+                      automaticallyImplyLeading: true,
+                    ),
                     body: SafeArea(
                       child: LayoutBuilder(builder: (context, constraints) {
                         return ProfileScreen(
@@ -289,12 +326,53 @@ class MyApp extends StatelessWidget {
     required Widget Function(
       BuildContext context,
       LikedPostPresenterState likedPostsPresenterState,
-      BaseState<List<String>> likedPostsState,
+      BaseState<List<PostEntity>> likedPostsState,
     ) builder,
   }) {
     return LikedPostPresenter(
       likedPostsCubit: dependency.get(),
       builder: builder,
+    );
+  }
+
+  NavigationMenuBuilder get usersScreen {
+    return (context, selectedMenuIndex, onNavigate) {
+      return UsersPresenter(
+          usersCubit: dependency.get(),
+          builder: (context, usersPresenterState, usersState) {
+            return UserListScreen(
+              usersState: usersState,
+              onLoadUsers: usersPresenterState.load,
+              onTapUserItem: (value) {
+                if (profileMeCubit.userId == value.id) {
+                  return onNavigate(PROFILE_INDEX);
+                }
+                Navigator.pushNamed(context, "/profile?id=${value.id}");
+                return;
+              },
+            );
+          });
+    };
+  }
+
+  Widget get friendsScreen {
+    return _friendsPresenter(
+      builder: (context, friendsPresenterState, friendsState) {
+        return Scaffold(
+          body: SafeArea(
+            child: LayoutBuilder(builder: (context, constraints) {
+              return UserListScreen(
+                usersState: friendsState,
+                onLoadUsers: friendsPresenterState.load,
+                onTapUserItem: (value) {
+                  Navigator.pushNamed(context, "/profile?id=${value.id}");
+                  return;
+                },
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }

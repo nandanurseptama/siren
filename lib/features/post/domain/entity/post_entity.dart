@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:siren/features/post/data/models/post_model.dart';
 import 'package:siren/features/user/domain/entity/user_entity.dart';
 
 class PostEntity extends Equatable {
@@ -20,4 +21,8 @@ class PostEntity extends Equatable {
       required this.owner});
   @override
   List<Object?> get props => [id, image, likes, tags, text, publishDate, owner];
+
+  PostModel get model{
+    return PostModel(id: id, image: image, likes: likes, tags: tags, text: text, publishDate: publishDate, owner: owner.toModel);
+  }
 }

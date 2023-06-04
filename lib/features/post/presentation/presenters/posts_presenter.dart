@@ -9,12 +9,12 @@ import 'package:siren/features/post/presentation/state_manager/posts_cubit.dart'
 
 class PostsPresenter extends PresenterWidget<PaginationState<PostEntity>> {
   final PostsCubit postsCubit;
-  final BaseState<List<String>> likedPostsState;
+  final BaseState<List<PostEntity>> likedPostsState;
   final Widget Function(
     BuildContext context,
     PostsPresenterState postsPresenterState,
     PaginationState<PostEntity> postsState,
-    BaseState<List<String>> likedPostsState,
+    BaseState<List<PostEntity>> likedPostsState,
   ) builder;
   const PostsPresenter(
       {super.key,
@@ -69,7 +69,7 @@ class PostsPresenterState
 
   bool isLiked(String id) {
     var datas = widget.likedPostsState.data ?? [];
-    var indexWhere = datas.indexWhere((element) => element == id);
+    var indexWhere = datas.indexWhere((element) => element.id == id);
     return indexWhere > -1;
   }
 }

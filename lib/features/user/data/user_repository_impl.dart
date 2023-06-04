@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 import 'package:siren/cores/env.dart';
@@ -26,9 +25,32 @@ class UserRepositoryImpl implements UserRepository {
         _friendsDatabase = friendDatabase;
   @override
   Future<PaginateData<UserModel>> getAllUsers(
-      {required String processId, int page = 0, int limit = 20}) {
-    // TODO: implement getAllUsers
-    throw UnimplementedError();
+      {required String processId, int page = 0, int limit = 20}) async {
+    try {
+      var response = await _httpClient
+          .get(_env.userUrl, queryParameters: {"page": page, "limit": limit});
+
+      if (response.data == null) {
+        return PaginateData(
+            data: List.empty(growable: true),
+            page: page,
+            limit: limit,
+            total: 0);
+      }
+      if (response.data is! Map<String, dynamic>) {
+        throw InvalidResponseTypeFailure();
+      }
+      return PaginateData.fromJson(
+        json: response.data,
+        builder: (json) {
+          return UserModel.fromJson(json);
+        },
+      );
+    } catch (err, trace) {
+      var failure =
+          repositoryErrorHandler(err: err, processId: processId, trace: trace);
+      throw failure;
+    }
   }
 
   @override
@@ -68,7 +90,6 @@ class UserRepositoryImpl implements UserRepository {
       var start = (page * limit);
       var to = ((page + 1) * limit);
       var end = to > users.length ? users.length : to;
-      debugPrint("UserRepostiotry start $start, end $end");
       var subUsers = users.sublist(start, end);
       return PaginateData<UserModel>(
           data: subUsers, limit: limit, page: page, total: users.length);

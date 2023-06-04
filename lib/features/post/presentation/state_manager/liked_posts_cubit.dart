@@ -2,12 +2,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:siren/cores/interfaces/states/base_state.dart';
 import 'package:siren/cores/usecase/usecase.dart';
+import 'package:siren/features/post/domain/entity/post_entity.dart';
 import 'package:siren/features/post/domain/usecases/dislike_post_usecase.dart';
 import 'package:siren/features/post/domain/usecases/get_liked_posts_usecase.dart';
 import 'package:siren/features/post/domain/usecases/like_post_usecase.dart';
 
 @lazySingleton
-class LikedPostsCubit extends Cubit<BaseState<List<String>>> {
+class LikedPostsCubit extends Cubit<BaseState<List<PostEntity>>> {
   final GetLikedPostsUsecase getLikedPostsUsecase;
   final LikePostUsecase likePostUsecase;
   final DislikePostUsecase dislikePostUsecase;
@@ -37,7 +38,6 @@ class LikedPostsCubit extends Cubit<BaseState<List<String>>> {
     });
   }
 
-
   Future<void> dislike(String id) {
     var prevState = state;
     emit(BaseState.loading(data: prevState.data));
@@ -58,10 +58,10 @@ class LikedPostsCubit extends Cubit<BaseState<List<String>>> {
     });
   }
 
-  Future<void> like(String id) {
+  Future<void> like(PostEntity post) {
     var prevState = state;
     emit(BaseState.loading(data: prevState.data));
-    return likePostUsecase(id).then((result) {
+    return likePostUsecase(post).then((result) {
       return result.maybeMap<void>(
         ok: (ok) async {
           await call();
