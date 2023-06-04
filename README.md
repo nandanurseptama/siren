@@ -10,4 +10,4 @@ Tested on :
 - Android 12
 - IOS 14
 
-Download APK <a href="https://drive.google.com/file/d/1cePHT5zW2K_Z8T_oEgrmkxaPdn60ChdO/view?usp=share_link">Here</a>
+Download APK <a href="https://drive.google.com/file/d/1rJGuOxDoB0v9OwjrHMDNEpDfr3TQCXmO/view?usp=share_link">Here</a>
